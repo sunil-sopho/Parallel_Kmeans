@@ -8,4 +8,5 @@ class point{
 		point(int x1,int y1, int z1);
 		long distance(point p);
 		int x,y,z;
+		void runningMean(point p,int num);
 };

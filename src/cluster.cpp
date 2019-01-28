@@ -2,8 +2,11 @@
 
 cluster::cluster(int val){
 	k = val; // setting k for kmeans
+	pointsChange = -1; //For debugging purpose
+	dataPoints = -1; // negative itialization
 }
 
+// Set dataPoints here @check @sunil
 void cluster::readData(){
 	
 }
@@ -29,7 +32,7 @@ void cluster::train(){
 		// now chose new centroids
 		updateCentroids();
 		// check for convergence
-		if(Converge()){
+		if(Converge(iterationNum)){
 			break;
 		}
 	}
@@ -54,11 +57,34 @@ void cluster::getClusters(){
 		}
 		if(clusters[i] != clas)
 			changedPoints++;
-		clusters[i] = clas;
-	}	
+		clusters[i] = clas;	
+	}
+	pointsChange = changedPoints;	
 }
 
 void cluster::updateCentroids(){
+	for(int i=0;i<k;i++){
+		point pmean(0,0,0);
+		int numPoints = 1;
+		for(int j=0;j<dataPoints;j++){
+			if(clusters[j]==i){
+				pmean.runningMean(vec[j],numPoints);
+				numPoints++;
+			}
+		}
+		centroids[i] = pmean;
+	}
 }
 
+long cluster::getDistance(point p1,point p2){
+	return p1.distance(p2);
+}
 
+bool cluster::Converge(int iterationNumber){
+	if(pointsChange < dataPoints*0.005)
+		return true;
+	if(iterationNumber > 100)
+		return true;
+	return false;
+
+}
