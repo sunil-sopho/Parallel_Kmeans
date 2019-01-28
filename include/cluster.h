@@ -1,15 +1,21 @@
 #include <bits/stdc++.h>
-
+#include <point.h>
 using namespace std;
 
 class cluster{
 	public:
 		cluster();
 		~cluster();
-	
+		void readData();
+		void train();
 	private:
 		int k;
-		vector<int> centroids;
+		vector<int> clusters;
+		vector<point> centroids;
 		void init_random();
-		vector<int> vec;	
+		vector<point> vec;
+		void getClusters();
+		void updateCentroids;
+		bool Converge();
+		int getDistance(point p1,point p2);	
 }
