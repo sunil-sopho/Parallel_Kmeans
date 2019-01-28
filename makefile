@@ -11,11 +11,11 @@ LDIR=-L../lib
 LIBS=-lm 
 
 
-_DEPS= kmeans.h cluster.h
+_DEPS= kmeans.h cluster.h point.h
 	
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ = kmeans.o cluster.o
+_OBJ = kmeans.o cluster.o point.o
 
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 

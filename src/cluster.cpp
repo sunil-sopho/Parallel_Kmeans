@@ -41,22 +41,24 @@ void cluster::getClusters(){
 	int changedPoints = 0;
 	for(int i=0;i<vec.size();i++){
 		long distance = 1e12;
-		int class = clusters[i];
+		int clas = clusters[i];
 		for(int j=0;j<k;j++){
 			long dist = getDistance(vec[i],centroids[j]);
 			if(dist < distance){
 				distance = dist;
-				class = j;
+				clas = j;
 			}
 		}
-		if(class == -1){
+		if(clas == -1){
 			cout << "exited due to class -1\n"; 
 		}
-		if(clusters[i] != class)
+		if(clusters[i] != clas)
 			changedPoints++;
-		clusters[i] = class;
+		clusters[i] = clas;
 	}	
 }
 
+void cluster::updateCentroids(){
+}
 
 

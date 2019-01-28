@@ -4,7 +4,7 @@ using namespace std;
 
 class cluster{
 	public:
-		cluster();
+		cluster(int val);
 		~cluster();
 		void readData();
 		void train();
@@ -15,7 +15,7 @@ class cluster{
 		void init_random();
 		vector<point> vec;
 		void getClusters();
-		void updateCentroids;
+		void updateCentroids();
 		bool Converge();
 		int getDistance(point p1,point p2);	
-}
+};
