@@ -22,8 +22,8 @@ that:
 
 A iterative sequential algorithm is provided for your reference:
 
-1. For a givenk, choosekcentroids,m 1 ,···, mk. One can resort toForgy methodorRandom
-    partitionmethod for this initialization.
+1. For a given k, choose k centroids,m 1 ,···, mk. One can resort to Forgy method or Random
+    partition method for this initialization.
 2. After computingkcentroids, assign points to each centroid to form a cluster. Common way to
     assign a point to a centroid is to find the nearest centroid. A point cannot, at any point, belong
     to two different clusters. At the end of this stage, one should have the clusters{S 1 ,···, Sk}.
