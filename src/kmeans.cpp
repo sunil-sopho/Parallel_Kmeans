@@ -10,10 +10,10 @@ using namespace std;
 
 
 int main(){
-	cluster kmeanSerial(1100);
-	kmeanSerial.readData();
+	cluster kmeanSerial(1100,2);
+//	kmeanSerial.readData();
 //	kmeanSerial.printData();
-	kmeanSerial.train();
-	kmeanSerial.kScore();
+//	kmeanSerial.train();
+//	kmeanSerial.kScore();
 	return 0;
 }

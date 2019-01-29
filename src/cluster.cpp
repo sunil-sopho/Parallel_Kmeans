@@ -1,9 +1,14 @@
 #include <cluster.h>
 
-cluster::cluster(int val){
+cluster::cluster(int val,int mode){
 	k = val; // setting k for kmeans
 	pointsChange = -1; //For debugging purpose
 	dataPoints = -1; // negative itialization
+	if(mode==1){
+		cout << "setup for pthreads \n";
+	}else if(mode==2){
+		cout << "setup for openmp\n";
+	}
 }
 
 // Set dataPoints here @check @sunil

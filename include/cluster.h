@@ -4,7 +4,10 @@ using namespace std;
 
 class cluster{
 	public:
-		cluster(int val);
+		// mode = 0 for serial
+		// mode = 1 for pthread
+		// mode = 2 for openmp
+		cluster(int val,int mode=0);
 		~cluster();
 		void readData();
 		void train();
