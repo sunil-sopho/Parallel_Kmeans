@@ -8,6 +8,8 @@ class cluster{
 		~cluster();
 		void readData();
 		void train();
+		void printData();
+		double kScore();
 	private:
 		int k;
 		int pointsChange;
@@ -19,5 +21,6 @@ class cluster{
 		void getClusters();
 		void updateCentroids();
 		bool Converge(int iterationNumber);
-		long getDistance(point p1,point p2);	
+		float getDistance(point p1,point p2);	
+		void printCentroids();
 };
