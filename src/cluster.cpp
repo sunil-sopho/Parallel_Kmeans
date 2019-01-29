@@ -8,9 +8,15 @@ cluster::cluster(int val){
 
 // Set dataPoints here @check @sunil
 void cluster::readData(){
-	
+	cout << "data Points Collected :: "<<dataPoints<<endl;
 }
 
+cluster::~cluster(){
+	clusters.clear();
+	centroids.clear();
+	vec.clear();
+	cout << " Destroyer Called "<<endl;
+}
 void cluster::init_random(){
  	random_shuffle(vec.begin(),vec.end());
 	if(centroids.size() > 0)

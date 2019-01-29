@@ -10,6 +10,7 @@ using namespace std;
 
 
 int main(){
-
+	cluster kmeanSerial(2);
+	kmeanSerial.readData();
 	return 0;
 }
