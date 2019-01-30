@@ -1,8 +1,7 @@
 IDIR =include 
 CXX=g++ 
 CC=gcc
-CXXFLAGS= -I$(IDIR) -I./lib  -std=c++11 -w -fpermissive -pthread -O3
-
+CXXFLAGS= -I$(IDIR) -I./lib  -std=c++11 -w -fpermissive -pthread -fopenmp -O3 
 SRCDIR=src
 ODIR=build
 TARGET=bin/kmeans

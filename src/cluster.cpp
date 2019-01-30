@@ -1,7 +1,10 @@
 #include <cluster.h>
 #include<pthread.h>
+#include<omp.h>
 // @check @sunil lock for pthreads
 pthread_mutex_t lockSet;
+omp_lock_t writelock;
+
 int numThreads =2;
 int k;
 int pointsChange;
@@ -24,8 +27,8 @@ cluster::cluster(int val,int mode){
 // Set dataPoints here @check @sunil
 void cluster::readData(){
 	cout <<"start\n";
-	freopen("./dataset/input.dat", "r", stdin);
-	string s,delimiter=" ";
+	freopen("./dataset/input1.csv", "r", stdin);
+	string s,delimiter=",";
 	getline(cin,s);
 	getline(cin,s);
 	while(getline(cin,s)){
@@ -137,12 +140,36 @@ void* clusterSetter(void* tid){
   	pthread_mutex_unlock(&lockSet);
 	return NULL;
 }
+void clusterSetterOMP(){
+	int tid = omp_get_thread_num();	
+	int intialDis = tid*(vec.size()/numThreads);
+	int i = 0 + intialDis;
+	int end;
+	int changedPoints =0;
+	if(tid!=numThreads-1)
+		end = (tid+1)*(vec.size()/numThreads);
+	else
+		end = vec.size();
+	for(;i<end;i++){
+		int clas = clusters[i];
+		clas = classChecker(i);
+		if(clusters[i] != clas)
+			changedPoints++;
+		clusters[i] = clas;
+	}
+//			omp_set_lock(&writelock);	
+	#pragma omp critical
+	{
+		pointsChange += changedPoints;
+	}
+//			omp_unset_lock(&writelock);
 
+}
 
 void cluster::getClusters(){
 
 	// @check @sunil definately wrong :p
-	if(mod != 1){
+	if(mod == 0){
 		int changedPoints = 0;
 		for(int i=0;i<vec.size();i++){
 			int clas = clusters[i];
@@ -156,10 +183,10 @@ void cluster::getClusters(){
 		}
 		pointsChange = changedPoints;	
 		cout <<"Points Changed :: "<< pointsChange<<endl;
-	}else{
+	}else if(mod == 1){
 		pointsChange = 0;
 		pthread_t clusterSet[numThreads];
-		int static tid[10];
+		int  static tid[10];
 //		int *tid = (int *) malloc (sizeof (int)*10);
 		for(int i=0;i<numThreads;i++){
 			tid[i] = i;
@@ -170,20 +197,57 @@ void cluster::getClusters(){
 			pthread_join(clusterSet[i],NULL);
 		}
 		// Here all clusters should be set
+	}else{
+		pointsChange = 0;
+		omp_init_lock(&writelock);
+		#pragma omp parallel num_threads(numThreads)
+		{
+			clusterSetterOMP();
+		}
 	}
 }
 
-void cluster::updateCentroids(){
-	for(int i=0;i<k;i++){
-		point pmean(0.0,0.0,0.0);
-		int numPoints = 1;
-		for(int j=0;j<dataPoints;j++){
-			if(clusters[j]==i){
-				pmean.runningMean(vec[j],numPoints);
-				numPoints++;
-			}
+void* centroidUpdate(void* tid){
+	int *ti = (int*)(tid);
+	
+	point pmean(0.0,0.0,0.0);
+	int numPoints = 1;
+	for(int j=0;j<vec.size();j++){
+		if(clusters[j]==*ti){
+			pmean.runningMean(vec[j],numPoints);
+			numPoints++;
 		}
-		centroids[i] = pmean;
+	}
+	centroids[*ti] = pmean;
+	
+	return NULL;
+}
+
+void cluster::updateCentroids(){
+//	cout <<"out1"<<endl;
+	if(true){
+		for(int i=0;i<k;i++){
+			point pmean(0.0,0.0,0.0);
+			int numPoints = 1;
+			for(int j=0;j<dataPoints;j++){
+				if(clusters[j]==i){
+					pmean.runningMean(vec[j],numPoints);
+					numPoints++;
+				}
+			}
+			centroids[i] = pmean;
+		}
+	}else{
+		pthread_t centroidUp[numThreads];
+		int tid[k];
+		for(int i=0;i<k;i++){
+			tid[i] = i;
+			pthread_create(&centroidUp[i],NULL,&centroidUpdate,&tid[i]);
+		}
+		// Now wait for them all to join
+		for(int i=0;i<numThreads;i++){
+			pthread_join(centroidUp[i],NULL);
+		}
 	}
 }
 
