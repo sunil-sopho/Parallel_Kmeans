@@ -9,11 +9,19 @@ using namespace std;
 
 
 
-int main(){
-	cluster kmeanSerial(1100,2);
-//	kmeanSerial.readData();
+int main(int argc, char** argv){
+	int mode=0;
+	if(argc>2){
+		cout <<"usage :: ./kmeans <mode>"<<endl;
+	}
+	if(argc==2){
+		mode = stoi(argv[1]);
+	}
+
+	cluster kmeanSerial(10,mode);
+	kmeanSerial.readData();
 //	kmeanSerial.printData();
-//	kmeanSerial.train();
+	kmeanSerial.train();
 //	kmeanSerial.kScore();
 	return 0;
 }

@@ -1,5 +1,8 @@
 #include <bits/stdc++.h>
 #include <point.h>
+#include <omp.h>
+#include <pthread.h>
+
 using namespace std;
 
 class cluster{
@@ -14,16 +17,20 @@ class cluster{
 		void printData();
 		double kScore();
 	private:
-		int k;
-		int pointsChange;
+//		int k;
+		int mod;
+//		int pointsChange;
 		int dataPoints;
-		vector<int> clusters;
-		vector<point> centroids;
+//		vector<int> clusters;
+//		vector<point> centroids;
 		void init_random();
-		vector<point> vec;
+//		vector<point> vec;
 		void getClusters();
 		void updateCentroids();
 		bool Converge(int iterationNumber);
-		float getDistance(point p1,point p2);	
+//		float getDistance(point p1,point p2);	
 		void printCentroids();
+//		void* clusterSetter(void* tid);
+//		int classChecker(int i);
+
 };

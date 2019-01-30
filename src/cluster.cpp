@@ -1,9 +1,19 @@
 #include <cluster.h>
+#include<pthread.h>
+// @check @sunil lock for pthreads
+pthread_mutex_t lockSet;
+int numThreads =2;
+int k;
+int pointsChange;
+vector<int> clusters;
+vector<point> vec;
+vector<point> centroids;
 
 cluster::cluster(int val,int mode){
 	k = val; // setting k for kmeans
 	pointsChange = -1; //For debugging purpose
 	dataPoints = -1; // negative itialization
+	mod = mode;
 	if(mode==1){
 		cout << "setup for pthreads \n";
 	}else if(mode==2){
@@ -14,8 +24,8 @@ cluster::cluster(int val,int mode){
 // Set dataPoints here @check @sunil
 void cluster::readData(){
 	cout <<"start\n";
-	freopen("./dataset/input1.csv", "r", stdin);
-	string s,delimiter=",";
+	freopen("./dataset/input.dat", "r", stdin);
+	string s,delimiter=" ";
 	getline(cin,s);
 	getline(cin,s);
 	while(getline(cin,s)){
@@ -52,6 +62,11 @@ cluster::~cluster(){
 	vec.clear();
 	cout << " Destroyer Called "<<endl;
 }
+
+float getDistance(point p1,point p2){
+	return p1.distance(p2);
+}
+
 void cluster::init_random(){
  	random_shuffle(vec.begin(),vec.end());
 	if(centroids.size() > 0)
@@ -65,6 +80,7 @@ void cluster::init_random(){
 }
 
 void cluster::train(){
+	pthread_mutex_init(&lockSet, NULL);
 	bool run = true;
 	int iterationNum=0;
 	init_random();
@@ -83,27 +99,78 @@ void cluster::train(){
 	printCentroids();
 }
 
-void cluster::getClusters(){
-	int changedPoints = 0;
-	for(int i=0;i<vec.size();i++){
-		float distance = 1e7;
+int classChecker(int i){
+	int clas = -1;
+	float distance = 1e7;
+	for(int j=0;j<k;j++){
+		float dist = getDistance(vec[i],centroids[j]);
+		if(dist < distance){
+			distance = dist;
+			clas = j;
+		}
+	}
+	return clas;
+}
+
+//
+//sets clusters for pthread ,tid will give part which
+//it will work on
+void* clusterSetter(void* tid){
+	int *ti = (int*)(tid);
+	int intialDis = *ti*(vec.size()/numThreads);
+	int i = 0 + intialDis;
+	int end;
+	int changedPoints =0;
+	if(*ti!=numThreads-1)
+		end = (*ti+1)*(vec.size()/numThreads);
+	else
+		end = vec.size();
+	for(;i<end;i++){
 		int clas = clusters[i];
-		for(int j=0;j<k;j++){
-			float dist = getDistance(vec[i],centroids[j]);
-			if(dist < distance){
-				distance = dist;
-				clas = j;
-			}
-		}
-		if(clas == -1){
-			cout << "exited due to class -1\n"; 
-		}
+		clas = classChecker(i);
 		if(clusters[i] != clas)
 			changedPoints++;
-		clusters[i] = clas;	
+		clusters[i] = clas;
 	}
-	pointsChange = changedPoints;	
-	cout <<"Points Changed :: "<< pointsChange<<endl;
+  	pthread_mutex_lock(&lockSet);
+  	pointsChange += changedPoints;
+  	pthread_mutex_unlock(&lockSet);
+	return NULL;
+}
+
+
+void cluster::getClusters(){
+
+	// @check @sunil definately wrong :p
+	if(mod != 1){
+		int changedPoints = 0;
+		for(int i=0;i<vec.size();i++){
+			int clas = clusters[i];
+			clas = classChecker(i);
+			if(clas == -1){
+				cout << "exited due to class -1\n"; 
+			}
+			if(clusters[i] != clas)
+				changedPoints++;
+			clusters[i] = clas;	
+		}
+		pointsChange = changedPoints;	
+		cout <<"Points Changed :: "<< pointsChange<<endl;
+	}else{
+		pointsChange = 0;
+		pthread_t clusterSet[numThreads];
+		int static tid[10];
+//		int *tid = (int *) malloc (sizeof (int)*10);
+		for(int i=0;i<numThreads;i++){
+			tid[i] = i;
+			pthread_create(&clusterSet[i],NULL,&clusterSetter,&tid[i]);
+		}
+		// Now wait for them all to join
+		for(int i=0;i<numThreads;i++){
+			pthread_join(clusterSet[i],NULL);
+		}
+		// Here all clusters should be set
+	}
 }
 
 void cluster::updateCentroids(){
@@ -126,9 +193,6 @@ void cluster::printCentroids(){
 	}
 }
 
-float cluster::getDistance(point p1,point p2){
-	return p1.distance(p2);
-}
 
 bool cluster::Converge(int iterationNumber){
 	if(pointsChange <= dataPoints*0.00)

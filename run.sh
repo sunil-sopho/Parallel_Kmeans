@@ -1,1 +1,1 @@
-./bin/kmeans
+./bin/kmeans $1
